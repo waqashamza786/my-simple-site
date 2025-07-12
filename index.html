@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Your Music, Your Way</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-animation">
+            <div class="music-note">♪</div>
+            <div class="loading-text">Loading MusicStream...</div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content glass-effect">
+            <span class="close-modal">&times;</span>
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <h2>Welcome Back</h2>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="login-email" placeholder="Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Login</button>
+                    <div class="auth-divider">or</div>
+                    <button type="button" class="google-auth-btn">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </button>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" class="auth-form">
+                    <h2>Join MusicStream</h2>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signup-name" placeholder="Full Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signup-email" placeholder="Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signup-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                    <div class="auth-divider">or</div>
+                    <button type="button" class="google-auth-btn">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass-effect">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <span>MusicStream</span>
+                </div>
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <div class="nav-menu">
+                <div class="nav-section">
+                    <a href="#home" class="nav-item active" data-page="home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="#search" class="nav-item" data-page="search">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </a>
+                    <a href="#library" class="nav-item" data-page="library">
+                        <i class="fas fa-book"></i>
+                        <span>Your Library</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Discover</h3>
+                    <a href="#genres" class="nav-item" data-page="genres">
+                        <i class="fas fa-guitar"></i>
+                        <span>Genres & Moods</span>
+                    </a>
+                    <a href="#charts" class="nav-item" data-page="charts">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Charts</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Playlists</h3>
+                    <a href="#create-playlist" class="nav-item" data-page="create-playlist">
+                        <i class="fas fa-plus"></i>
+                        <span>Create Playlist</span>
+                    </a>
+                    <div id="user-playlists" class="user-playlists">
+                        <!-- User playlists will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile" id="user-profile">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-avatar">
+                    <div class="profile-info">
+                        <span class="profile-name">User Name</span>
+                        <span class="profile-email">user@email.com</span>
+                    </div>
+                    <button class="logout-btn" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar glass-effect">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="global-search" placeholder="Search for songs, artists, albums...">
+                        <div id="search-suggestions" class="search-suggestions hidden"></div>
+                    </div>
+                </div>
+                
+                <div class="top-bar-actions">
+                    <button class="notification-btn" id="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/32" alt="User" class="user-avatar">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Home Page -->
+                <div id="home-page" class="page active">
+                    <div class="page-header">
+                        <h1>Good evening</h1>
+                        <p>Ready to discover new music?</p>
+                    </div>
+
+                    <section class="quick-picks">
+                        <h2>Quick Picks</h2>
+                        <div class="quick-picks-grid">
+                            <!-- Quick pick items will be dynamically added -->
+                        </div>
+                    </section>
+
+                    <section class="featured-section">
+                        <h2>Featured Albums</h2>
+                        <div class="album-grid">
+                            <!-- Featured albums will be dynamically added -->
+                        </div>
+                    </section>
+
+                    <section class="recently-played">
+                        <h2>Recently Played</h2>
+                        <div class="track-list">
+                            <!-- Recently played tracks will be dynamically added -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Search Page -->
+                <div id="search-page" class="page">
+                    <div class="page-header">
+                        <h1>Search</h1>
+                        <div class="search-filters">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="songs">Songs</button>
+                            <button class="filter-btn" data-filter="artists">Artists</button>
+                            <button class="filter-btn" data-filter="albums">Albums</button>
+                            <button class="filter-btn" data-filter="playlists">Playlists</button>
+                        </div>
+                    </div>
+
+                    <div class="search-results">
+                        <div id="search-results-container">
+                            <!-- Search results will be displayed here -->
+                        </div>
+                    </div>
+
+                    <section class="browse-categories">
+                        <h2>Browse Categories</h2>
+                        <div class="category-grid">
+                            <!-- Browse categories will be dynamically added -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Library Page -->
+                <div id="library-page" class="page">
+                    <div class="page-header">
+                        <h1>Your Library</h1>
+                        <div class="library-filters">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="playlists">Playlists</button>
+                            <button class="filter-btn" data-filter="artists">Artists</button>
+                            <button class="filter-btn" data-filter="albums">Albums</button>
+                        </div>
+                    </div>
+
+                    <div class="library-content">
+                        <div class="library-grid">
+                            <!-- Library items will be dynamically added -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Genres Page -->
+                <div id="genres-page" class="page">
+                    <div class="page-header">
+                        <h1>Genres & Moods</h1>
+                        <p>Discover music that fits your vibe</p>
+                    </div>
+
+                    <div class="genres-grid">
+                        <!-- Genre cards will be dynamically added -->
+                    </div>
+                </div>
+
+                <!-- Artist Page -->
+                <div id="artist-page" class="page">
+                    <div class="artist-header">
+                        <div class="artist-cover">
+                            <img id="artist-image" src="" alt="Artist">
+                        </div>
+                        <div class="artist-info">
+                            <h1 id="artist-name"></h1>
+                            <p id="artist-followers"></p>
+                            <div class="artist-actions">
+                                <button class="play-btn primary">
+                                    <i class="fas fa-play"></i>
+                                    Play
+                                </button>
+                                <button class="follow-btn">
+                                    <i class="fas fa-heart"></i>
+                                    Follow
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="artist-content">
+                        <section class="popular-tracks">
+                            <h2>Popular</h2>
+                            <div id="artist-popular-tracks" class="track-list">
+                                <!-- Popular tracks will be dynamically added -->
+                            </div>
+                        </section>
+
+                        <section class="artist-albums">
+                            <h2>Albums</h2>
+                            <div id="artist-albums-grid" class="album-grid">
+                                <!-- Artist albums will be dynamically added -->
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Album Page -->
+                <div id="album-page" class="page">
+                    <div class="album-header">
+                        <div class="album-cover">
+                            <img id="album-image" src="" alt="Album">
+                        </div>
+                        <div class="album-info">
+                            <span class="album-type">Album</span>
+                            <h1 id="album-title"></h1>
+                            <p id="album-artist"></p>
+                            <div class="album-meta">
+                                <span id="album-year"></span>
+                                <span id="album-duration"></span>
+                            </div>
+                            <div class="album-actions">
+                                <button class="play-btn primary">
+                                    <i class="fas fa-play"></i>
+                                    Play
+                                </button>
+                                <button class="save-btn">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="more-btn">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="album-tracks">
+                        <div class="track-list-header">
+                            <span>#</span>
+                            <span>Title</span>
+                            <span>Duration</span>
+                        </div>
+                        <div id="album-track-list" class="track-list">
+                            <!-- Album tracks will be dynamically added -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Now Playing Page -->
+                <div id="now-playing-page" class="page">
+                    <div class="now-playing-container">
+                        <div class="now-playing-cover">
+                            <img id="now-playing-image" src="" alt="Now Playing">
+                        </div>
+                        <div class="now-playing-info">
+                            <h1 id="now-playing-title"></h1>
+                            <p id="now-playing-artist"></p>
+                        </div>
+                        <div class="now-playing-controls">
+                            <div class="progress-container">
+                                <span id="current-time">0:00</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                    <div class="progress-handle"></div>
+                                </div>
+                                <span id="total-time">0:00</span>
+                            </div>
+                            <div class="playback-controls">
+                                <button class="control-btn" id="shuffle-btn">
+                                    <i class="fas fa-random"></i>
+                                </button>
+                                <button class="control-btn" id="prev-btn">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button class="control-btn primary" id="play-pause-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="control-btn" id="next-btn">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                                <button class="control-btn" id="repeat-btn">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                            <div class="volume-controls">
+                                <i class="fas fa-volume-up"></i>
+                                <div class="volume-bar">
+                                    <div class="volume-fill"></div>
+                                    <div class="volume-handle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lyrics-container">
+                            <h3>Lyrics</h3>
+                            <div id="lyrics-content">
+                                <!-- Lyrics will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Page -->
+                <div id="error-page" class="page">
+                    <div class="error-container">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h1>Oops! Something went wrong</h1>
+                        <p>We couldn't find what you're looking for.</p>
+                        <button class="btn primary" onclick="navigateTo('home')">Go Home</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Mini Player -->
+        <div id="mini-player" class="mini-player glass-effect hidden">
+            <div class="mini-player-track">
+                <img id="mini-player-image" src="" alt="Track">
+                <div class="mini-player-info">
+                    <span id="mini-player-title"></span>
+                    <span id="mini-player-artist"></span>
+                </div>
+            </div>
+            <div class="mini-player-controls">
+                <button class="mini-control-btn" id="mini-prev-btn">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="mini-control-btn primary" id="mini-play-pause-btn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="mini-control-btn" id="mini-next-btn">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+            <div class="mini-player-actions">
+                <button class="mini-control-btn" id="mini-like-btn">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="mini-control-btn" id="expand-player-btn">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+            <div class="mini-progress-bar">
+                <div class="mini-progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div id="notifications-panel" class="notifications-panel glass-effect hidden">
+            <div class="notifications-header">
+                <h3>Notifications</h3>
+                <button class="close-notifications">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notifications-list">
+                <!-- Notifications will be dynamically added -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu glass-effect hidden">
+        <div class="context-menu-item" data-action="play">
+            <i class="fas fa-play"></i>
+            Play
+        </div>
+        <div class="context-menu-item" data-action="add-to-queue">
+            <i class="fas fa-list"></i>
+            Add to Queue
+        </div>
+        <div class="context-menu-item" data-action="add-to-playlist">
+            <i class="fas fa-plus"></i>
+            Add to Playlist
+        </div>
+        <div class="context-menu-item" data-action="like">
+            <i class="fas fa-heart"></i>
+            Like
+        </div>
+        <div class="context-menu-item" data-action="share">
+            <i class="fas fa-share"></i>
+            Share
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Main JavaScript -->
+    <script src="js/sample-data.js"></script>
+    <script src="js/music-api.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
+
