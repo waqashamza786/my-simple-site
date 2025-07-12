@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Chat App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1000px;
+            height: 90vh;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            background: linear-gradient(to bottom right, #4361ee, #3a0ca3);
+            color: white;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            display: none;
+        }
+        
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--light);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .sent {
+            align-self: flex-end;
+            background-color: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .received {
+            align-self: flex-start;
+            background-color: white;
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .message-text {
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.8;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--light-gray);
+            gap: 10px;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 30px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .message-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .send-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .signin-container {
+            text-align: center;
+            max-width: 400px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .app-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .app-description {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+        
+        .signin-btn {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .signin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .signin-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .online {
+            background-color: #4ade80;
+        }
+        
+        .offline {
+            background-color: var(--gray);
+        }
+        
+        .typing-indicator {
+            color: var(--gray);
+            font-style: italic;
+            font-size: 14px;
+            margin-left: 15px;
+            height: 20px;
+        }
+
+        .welcome-message {
+            margin-bottom: 15px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                height: 95vh;
+                border-radius: 15px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification"></div>
+    
+    <div class="container">
+        <!-- Authentication Section -->
+        <div class="auth-container" id="auth-container">
+            <div class="signin-container">
+                <h1 class="app-title">FireChat</h1>
+                <p class="app-description">
+                    Connect with friends in real-time with our secure chat app. 
+                    Sign in with Google to start chatting instantly.
+                </p>
+                <button id="signin-btn" class="signin-btn">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chat Interface -->
+        <div class="chat-container" id="chat-container">
+            <div class="header">
+                <div class="user-info">
+                    <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+                    <div>
+                        <div id="user-name">User</div>
+                        <div class="status">
+                            <span class="status-indicator online" id="status-indicator"></span>
+                            <span id="status-text">Online</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="logout-btn" class="logout-btn">Sign Out</button>
+            </div>
+            
+            <div class="messages-container" id="messages-container">
+                <!-- Messages will be displayed here -->
+                <div class="welcome-message">
+                    <div class="message received">
+                        <div class="message-text">
+                            Welcome to FireChat! Start sending messages to see them appear here in real-time.
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" id="message-input" class="message-input" placeholder="Type your message...">
+                <button id="send-btn" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAn5_ykClBBkoNaDZsoEapclyVNvER8Xzg",
+  authDomain: "chat-af8a1.firebaseapp.com",
+  databaseURL: "https://chat-af8a1-default-rtdb.firebaseio.com",
+  projectId: "chat-af8a1",
+  storageBucket: "chat-af8a1.firebasestorage.app",
+  messagingSenderId: "67545261496",
+  appId: "1:67545261496:web:8d3becf4acda9639ec9b4d"
+};
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // DOM elements
+        const authContainer = document.getElementById('auth-container');
+        const chatContainer = document.getElementById('chat-container');
+        const signinBtn = document.getElementById('signin-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const notification = document.getElementById('notification');
+        
+        // Sign in with Google
+        signinBtn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .catch(error => {
+                    console.error("Sign in error:", error);
+                    showNotification(`Sign in failed: ${error.message}`);
+                });
+        });
+        
+        // Sign out
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+        
+        // Send message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+            
+            // Add message to Firestore
+            db.collection('messages').add({
+                text: message,
+                uid: auth.currentUser.uid,
+                displayName: auth.currentUser.displayName,
+                photoURL: auth.currentUser.photoURL,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .catch(error => {
+                console.error("Error sending message:", error);
+                showNotification(`Error sending message: ${error.message}`);
+            });
+            
+            // Clear input
+            messageInput.value = '';
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Listen for auth state changes
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                authContainer.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                
+                // Update user info
+                userName.textContent = user.displayName;
+                userAvatar.src = user.photoURL;
+                
+                // Load messages
+                loadMessages();
+            } else {
+                // User is signed out
+                authContainer.style.display = 'flex';
+                chatContainer.style.display = 'none';
+                messagesContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <div class="message received">
+                            <div class="message-text">
+                                Welcome to FireChat! Start sending messages to see them appear here in real-time.
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        // Load and listen for messages
+        function loadMessages() {
+            db.collection('messages')
+                .orderBy('timestamp')
+                .onSnapshot(snapshot => {
+                    // Clear messages container except the welcome message
+                    messagesContainer.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        displayMessage(doc.data());
+                    });
+                    
+                    // Add welcome message if no messages
+                    if (snapshot.empty) {
+                        messagesContainer.innerHTML = `
+                            <div class="welcome-message">
+                                <div class="message received">
+                                    <div class="message-text">
+                                        Welcome to FireChat! Start sending messages to see them appear here in real-time.
+                                    </div>
+                                    <div class="message-time">Just now</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, error => {
+                    console.error("Error loading messages:", error);
+                    showNotification(`Error loading messages: ${error.message}`);
+                });
+        }
+        
+        // Display a message in the UI
+        function displayMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            
+            // Check if message is from current user
+            const isCurrentUser = auth.currentUser && auth.currentUser.uid === message.uid;
+            messageElement.classList.add(isCurrentUser ? 'sent' : 'received');
+            
+            // Format timestamp
+            const timestamp = message.timestamp ? 
+                new Date(message.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
+                'Just now';
+            
+            messageElement.innerHTML = `
+                ${!isCurrentUser ? `<div class="message-sender">${message.displayName}</div>` : ''}
+                <div class="message-text">${message.text}</div>
+                <div class="message-time">${timestamp}</div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Simulate online status
+        statusIndicator.classList.add('online');
+        statusText.textContent = 'Online';
+        
+        // Add welcome message to the console
+        console.log('%c🔥 FireChat 🔥', 'font-size: 24px; color: #4361ee; font-weight: bold;');
+        console.log('%cReal-time chat application powered by Firebase', 'font-size: 16px; color: #3a0ca3;');
+    </script>
+</body>
+</html>
