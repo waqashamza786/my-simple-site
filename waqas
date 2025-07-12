@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Simple Website</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      background: linear-gradient(135deg, #ff99cc, #66ccff);
+      color: #fff;
+    }
+    header {
+      padding: 100px 20px;
+    }
+    h1 {
+      font-size: 48px;
+      margin: 0;
+    }
+    p {
+      font-size: 20px;
+    }
+    footer {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌐 Welcome to My Website</h1>
+    <p>This is a simple one-page site hosted for free!</p>
+  </header>
+  <footer>
+    &copy; 2025 My Website | Made with ❤️
+  </footer>
+</body>
+</html>
